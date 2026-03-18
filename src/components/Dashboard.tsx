@@ -18,6 +18,7 @@ interface DashboardData {
   kpis: KPIData[];
   charts: ChartConfig[];
   totalRecords: number;
+  aiGenerated: boolean;
 }
 
 const KPI_COLORS = ['#2563eb', '#16a34a', '#7c3aed', '#f59e0b', '#0891b2'];
@@ -38,7 +39,7 @@ function computeLocally(prompt: string): DashboardData {
   const intent = parsePrompt(prompt);
   const queryResult = queryData(intent, salesData);
   const charts = selectCharts(intent, queryResult);
-  return { intent, kpis: queryResult.kpis, charts, totalRecords: queryResult.totalRecords };
+  return { intent, kpis: queryResult.kpis, charts, totalRecords: queryResult.totalRecords, aiGenerated: false };
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ prompt }) => {
@@ -65,8 +66,9 @@ const Dashboard: React.FC<DashboardProps> = ({ prompt }) => {
           kpis: KPIData[];
           charts: ChartConfig[];
           totalRecords: number;
+          aiGenerated: boolean;
         };
-        setData({ intent: json.intent, kpis: json.kpis, charts: json.charts, totalRecords: json.totalRecords });
+        setData({ intent: json.intent, kpis: json.kpis, charts: json.charts, totalRecords: json.totalRecords, aiGenerated: json.aiGenerated ?? false });
         setSource('api');
       })
       .catch((err) => {
@@ -106,6 +108,7 @@ const Dashboard: React.FC<DashboardProps> = ({ prompt }) => {
         <p className="dashboard-subtitle">{buildSubtitle(data.intent)}</p>
         <p className="dashboard-records">
           {data.totalRecords.toLocaleString()} records analyzed
+          {data.aiGenerated && <span className="badge-ai">✨ AI-powered</span>}
           {source === 'local' && <span className="badge-local"> (local mode)</span>}
         </p>
       </div>

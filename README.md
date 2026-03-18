@@ -1,73 +1,95 @@
-# React + TypeScript + Vite
+# Intelligent Dashboard Generator
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Generate fully interactive data dashboards from plain English prompts. Describe what you want in natural language and the system — powered by the **Gemini AI** — will parse your intent, query the sales dataset, pick the right chart types, and render a live dashboard instantly.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- 🤖 **Gemini AI-powered** natural language understanding (with rule-based fallback when no API key is set)
+- 📊 Interactive charts — line, area, bar, grouped bar, and pie via Recharts
+- 📈 KPI summary cards with year-over-year trend indicators
+- 🔍 24 months of sample sales data (4 regions × 6 product categories)
+- ⚡ React + TypeScript frontend, Express backend
 
-## React Compiler
+## Quick Start
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### 1. Install dependencies
 
-## Expanding the ESLint configuration
+```bash
+# Frontend
+npm install
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Backend
+cd backend && npm install && cd ..
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2. Configure Gemini API key (optional but recommended)
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cp backend/.env.example backend/.env
+# Edit backend/.env and add your GEMINI_API_KEY
 ```
+
+Get a free API key at <https://aistudio.google.com/app/apikey>.
+
+> Without a key the system falls back to the built-in rule-based parser — all features still work.
+
+### 3. Run both servers
+
+```bash
+npm run dev:all
+```
+
+- Frontend: <http://localhost:5173>
+- Backend API: <http://localhost:3001>
+
+Or run them separately:
+
+```bash
+npm run dev            # frontend only
+npm run backend:dev    # backend only (requires ts-node-dev)
+```
+
+### 4. Build for production
+
+```bash
+npm run build          # frontend
+npm run backend:build  # backend (outputs to backend/dist/)
+```
+
+## API Endpoints
+
+| Method | Path | Description |
+|--------|------|-------------|
+| `GET` | `/api/health` | Health check; includes `geminiConfigured` flag |
+| `GET` | `/api/data` | Raw sales dataset (filterable by `region`, `category`, `year`) |
+| `POST` | `/api/dashboard` | Generate a dashboard from a prompt |
+
+### POST /api/dashboard
+
+**Request body:**
+```json
+{ "prompt": "Show me monthly sales revenue for Q3 2024 broken down by region" }
+```
+
+**Response:**
+```json
+{
+  "intent": { ... },
+  "kpis": [ ... ],
+  "charts": [ ... ],
+  "totalRecords": 72,
+  "timePeriodLabel": "Q3 2024",
+  "aiGenerated": true
+}
+```
+
+`aiGenerated: true` means the intent was parsed by Gemini; `false` means the rule-based fallback was used.
+
+## Example Prompts
+
+- *"Show me monthly sales revenue for Q3 2024 broken down by region"*
+- *"Compare product category performance for 2024"*
+- *"What are the top performing regions by profit this year?"*
+- *"Show revenue trend for Electronics category over the past year"*
+- *"Give me a complete sales overview for Q4 2024"*
+

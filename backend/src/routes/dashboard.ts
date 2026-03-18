@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { parsePrompt } from '../lib/nlpParser';
+import { parsePromptWithGemini } from '../lib/geminiParser';
 import { queryData } from '../lib/queryEngine';
 import { selectCharts } from '../lib/chartSelector';
 import { salesData } from '../data/salesData';
@@ -7,7 +7,11 @@ import { salesData } from '../data/salesData';
 const router = Router();
 
 router.get('/health', (_req: Request, res: Response) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({
+    status: 'ok',
+    timestamp: new Date().toISOString(),
+    geminiConfigured: Boolean(process.env.GEMINI_API_KEY),
+  });
 });
 
 router.get('/data', (req: Request, res: Response) => {
@@ -19,14 +23,14 @@ router.get('/data', (req: Request, res: Response) => {
   res.json({ count: data.length, data });
 });
 
-router.post('/dashboard', (req: Request, res: Response) => {
+router.post('/dashboard', async (req: Request, res: Response) => {
   const { prompt } = req.body as { prompt?: string };
   if (!prompt || typeof prompt !== 'string' || prompt.trim().length === 0) {
     res.status(400).json({ error: 'prompt is required' });
     return;
   }
 
-  const intent = parsePrompt(prompt.trim());
+  const { intent, aiGenerated } = await parsePromptWithGemini(prompt.trim());
   const queryResult = queryData(intent, salesData);
   const charts = selectCharts(intent, queryResult);
 
@@ -40,6 +44,7 @@ router.post('/dashboard', (req: Request, res: Response) => {
     dataKeys: queryResult.dataKeys,
     totalRecords: queryResult.totalRecords,
     timePeriodLabel: intent.timePeriod.label,
+    aiGenerated,
   });
 });
 
