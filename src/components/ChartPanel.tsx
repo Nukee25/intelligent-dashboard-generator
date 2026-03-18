@@ -18,6 +18,7 @@ import {
 } from 'recharts';
 import type { ChartConfig } from '../lib/chartSelector';
 import type { PieLabelRenderProps } from 'recharts';
+import type { ValueType, NameType } from 'recharts/types/component/DefaultTooltipContent';
 
 interface ChartPanelProps {
   config: ChartConfig;
@@ -29,8 +30,7 @@ function formatYAxis(value: number): string {
   return String(value);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function tooltipFormatter(value: any, name: any): [string, string] {
+function tooltipFormatter(value: ValueType | undefined, name: NameType | undefined): [string, string] {
   const numVal = typeof value === 'number' ? value : Number(value) || 0;
   const nameStr = String(name ?? '');
   const isMonetary = nameStr === 'revenue' || nameStr === 'profit';

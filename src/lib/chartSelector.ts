@@ -35,11 +35,12 @@ function dimensionLabel(dim: string): string {
   }
 }
 
-export function selectCharts(_intent: DashboardIntent, queryResult: QueryResult): ChartConfig[] {
+export function selectCharts(intent: DashboardIntent, queryResult: QueryResult): ChartConfig[] {
   if (queryResult.primaryData.length === 0) return [];
 
   const charts: ChartConfig[] = [];
-  const { primaryData, secondaryData, xAxisKey, dataKeys, intent: qi } = queryResult;
+  const { primaryData, secondaryData, xAxisKey, dataKeys } = queryResult;
+  const qi = intent;
   const dims = qi.dimensions;
   const primaryMetric = dataKeys[0];
   const timePeriodLabel = qi.timePeriod.label;
